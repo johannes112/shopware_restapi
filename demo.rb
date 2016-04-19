@@ -15,4 +15,7 @@ shopware_user1 = ShopwareApi.new()#husername, hapikey)
 shopware_user1.setBasic(husername, hapikey, urlname)
 #shopware_user1.connectHtaccess()
 shopware_user1.setDigest(username, apikey, urlname)
-puts shopware_user1.getCustomer(1)
+#puts shopware_user1.deleteCustomer(79)
+shopware_user1.getCustomers()
+
+
