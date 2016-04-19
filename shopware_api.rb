@@ -1,30 +1,33 @@
 require 'httparty'
 # Use the class methods to get down to business quickly
 
-# Or wrap things up in your own class
 class ShopwareApi
   include HTTParty
   #for int use htaccess-data too
-  base_uri 'chefworks.de/api'
-  puts base_uri
   puts self
-  #http://int.chefworks.de/api/customers
+  puts
+  
+  def initialize()#username, password) 
+  end
 
-  def initialize(username, password) 
+  def setDigest(username, password, url_base)
+    class_httparty = self.class
+    class_httparty.base_uri url_base
+    class_httparty.default_options.delete(:basic_auth)
     @auth_digest = {:username => username, :password => password}
+    class_httparty.digest_auth username, password
+    puts "auth_digest:#{@auth_digest}"
   end
   
-  # def setHtaccess(huser, hpass)
-  #   @auth_htacess = {:username => huser, :password => hpass}
-  # end
+  def setBasic(username, password, url_base)
+    class_httparty = self.class
+    class_httparty.base_uri url_base
+    class_httparty.default_options.delete(:digest_auth)
+    @auth_basic = {:username => username, :password => password}
+    class_httparty.digest_auth username, password
+    puts "auth_basic:#{@auth_basic}"
+  end
 
-  # def connectHtaccess(huser, hpass)
-  #   @auth_htacess = {:username => huser, :password => hpass}
-  #   options = { :basic_auth => @auth_htacess } #:basic_auth => @auth_ht,
-  #   self.class.get(options)
-  #   puts base_uri
-  #   puts self.class
-  # end
   
   #customers
   def getCustomers()

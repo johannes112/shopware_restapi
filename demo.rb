@@ -1,10 +1,18 @@
+#this sample shows how to use the restapi of shopware with ruby
 require_relative 'shopware_api'
 username = ARGV[0]
+puts "username:#{username}"
 apikey = ARGV[1]
-#customer_para = ARGV[2]
+puts "apikey:#{apikey}"
 husername = ARGV[2]
+puts "husername:#{husername}"
 hapikey = ARGV[3]
-shopware_user1 = ShopwareApi.new(username, apikey)
-#shopware_user1.setHtaccess(husername, hapikey)
-#shopware_user1.connectHtaccess(husername, hapikey)
-puts shopware_user1.getCustomers()
+puts "hapikey:#{hapikey}"
+urlname = ARGV[4]
+puts "urlname:#{urlname}"
+
+shopware_user1 = ShopwareApi.new()#husername, hapikey)
+shopware_user1.setBasic(husername, hapikey, urlname)
+#shopware_user1.connectHtaccess()
+shopware_user1.setDigest(username, apikey, urlname)
+puts shopware_user1.getCustomer(1)
