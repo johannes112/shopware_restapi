@@ -25,118 +25,113 @@ class ShopwareApi
     #puts "auth_basic:#{@auth_basic}"
   end
 
-  
   #customers
   def getCustomers() #get all customers
     options = { :digest_auth => @auth_digest }
     response_data = self.class.get("/api/customers", options)
-    #p response_data
-    #to get json:
-    #response_json = response_data.parsed_response
-    #p "\n\n#{response_json}"
-    processHash(response_data)
     if response_data.success?
       response_data
     else
       raise response_data.response_data
     end
+    
+    customers = response_data
+    getCustomersAll(customers)
   end
 
   
   def getCustomer(id) #get one customer with id
     options = { :digest_auth => @auth_digest }
-    self.class.get("/api/customers/#{id}", options)
+    response_data = self.class.get("/api/customers/#{id}", options)
+    if response_data.success?
+      response_data
+    else
+      raise response_data.response_data
+    end
     
+    customer = response_data
+    p customer
   end
   
-  def deleteCustomer(id) #delete customer with id
+  def deleteCustomer(id) #delete customer by id
     options = { :digest_auth => @auth_digest }
     self.class.delete("/api/customers/#{id}", options)
-    
   end
   
-  def processHash(given_response_httpParty)
+  def deleteCustomerByKey(key, value) #delete customer with key by value
+    options = { :digest_auth => @auth_digest }
+    response_data = self.class.get("/api/customers", options)
+    if response_data.success?
+      response_data
+    else
+      raise response_data.response_data
+    end
+    
+    customers = response_data
+    p "delete user with id: #{getCustomerByKey(customers, key, value)}"
+    #self.class.delete("/api/customers/#{getCustomerByKey(customers, key, value)}", options)
+  end
+  
+  #get all customers
+  def getCustomersAll(given_response_httpParty)
     #get whole data of api
-    whole_response = given_response_httpParty.parsed_response
+    response_whole = given_response_httpParty.parsed_response
+    customer = response_whole
     #get all keys
-    whole_keys = whole_response.keys
-    #save part of keys
-    data = whole_response.fetch("data")
-    data_id = data.fetch("id")
-    total = whole_response.fetch("total")
-    last_entity = total-1
-    #printAll(data, total)
-    p data[1]
-    #save entities of data
-    #p data[last_entity]
-
-    # p totaljson_response = JSON.parse(given_response_httpParty.body)
-    # p "json_response: #{json_response.class}"
-    # #json_response_customer_id= hash_response_httpParty["data"][1]
-    # json_response_customer = json_response.fetch("data")
-    # json_response_customer_id = json_response_customer.find { |h| h['id'] == '1' }
-    # json_response_customer_mail = json_response_customer.find { |h| h['mail'] == 'nils.wolfram@em-group.de' }
-    #p json_response_customer_id
-    #p json_response_customer_mail
-    #cu = json_response["data"].find{ |customer| customer['id']=='1'}['email']
-    #puts cu
-    
-    #puts "\ncustomers:#{hash_customers["groupKey"]}"
-    #puts "\nid:#{given_hash["data"].select {|customer| customer["id"] = 1}}"
-    #given_hash.each_pair {|key,value| puts "#{key} = #{value}"}
-    
-    # given_hash.each do |key, value|
-    #   case (key)
-    #   when 'data'
-    #     handle_some_key(value)
-    #   when 'total'
-    #     handle_other_key(value)
-    #   end
-    #end
-    #filtered_hash = 
-    #given_hash.each_pair {|key,value| puts key if value == 1} 
-    #puts filtered_hash
-    #converted_hash = JSON.parse(given_hash)
-    #puts converted_hash
-    
-    # json_response = JSON.parse(given_response_httpParty.body)
-    # p "json_response: #{json_response.class}"
-    # #json_response_customer_id= hash_response_httpParty["data"][1]
-    # json_response_customer = json_response.fetch("data")
-    # json_response_customer_id = json_response_customer.find { |h| h['id'] == '1' }
-    # json_response_customer_mail = json_response_customer.find { |h| h['mail'] == 'nils.wolfram@em-group.de' }
-    #p json_response_customer_id
-    #p json_response_customer_mail
-    #cu = json_response["data"].find{ |customer| customer['id']=='1'}['email']
-    #puts cu
-    
-    #puts "\ncustomers:#{hash_customers["groupKey"]}"
-    #puts "\nid:#{given_hash["data"].select {|customer| customer["id"] = 1}}"
-    #given_hash.each_pair {|key,value| puts "#{key} = #{value}"}
-    
-    # given_hash.each do |key, value|
-    #   case (key)
-    #   when 'data'
-    #     handle_some_key(value)
-    #   when 'total'
-    #     handle_other_key(value)
-    #   end
-    #end
-    #filtered_hash = 
-    #given_hash.each_pair {|key,value| puts key if value == 1} 
-    #puts filtered_hash
-    #converted_hash = JSON.parse(given_hash)
-    #puts converted_hash
+    keys_whole = customer.keys
+    #save part of keys and unique entities
+    customer_data = customer.fetch("data")
+    customer_data_keys = customer_data[0].keys
+    customer_total = customer.fetch("total")
+    customer_last_entity = customer_total-1
+    customer_data_key = "email"
+    printAll(customer_data, customer_data_key, customer_total)
   end
 
-  def printAll(data, last_element)  
+  def printAll(data, key, last_element)  
   counter = 0
     while counter < last_element do
-      p ""
-      p data[counter]
+      p "ID:#{data[counter]["id"]}"
+      p "#{key}:#{data[counter][key]}"
       counter += 1
     end
   end
   
+
+  #get customer of id
+  def getCustomerByKey(given_response_httpParty, given_key, given_value)
+    #get whole data of api
+    whole_response = given_response_httpParty
+    customer = whole_response
+    #save part of keys and unique entities
+    customer_data = customer.fetch("data")
+    customer_total = customer.fetch("total")
+    customer_data_key = given_key
+    customer_data_value = given_value
+    
+    searchForValue(customer_data, customer_data_key, customer_data_value, customer_total)
+  end
+
+  def searchForValue(data, key, value, last_element)  
+    counter = 0
+    #loop over all elements
+    while counter < last_element do
+      #save each customer into overwritten variable received_data
+      received_data = data[counter][key]
+      #check var for value and then print the id of the received_data
+      if received_data==(value)
+        #p data[counter]["id"]
+        customer_id_determined = data[counter]["id"]
+        p "customer_id:#{customer_id_determined}"
+        if customer_id_determined
+          return customer_id_determined
+        else
+          return "No user with #{key}:#{value} exists!"
+        end
+      end
+      counter += 1
+    end
+  end
+
 end
 
