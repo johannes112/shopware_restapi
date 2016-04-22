@@ -46,7 +46,7 @@ class ShopwareApi
     if response_data.success?
       response_data
     else
-      raise response_data.response_data
+      p "No user with this id exist"
     end
     
     customer = response_data
@@ -68,8 +68,8 @@ class ShopwareApi
     end
     
     customers = response_data
-    p "delete user with id: #{getCustomerByKey(customers, key, value)}"
-    #self.class.delete("/api/customers/#{getCustomerByKey(customers, key, value)}", options)
+    customer_to_remove = getCustomerByKey(customers, key, value)
+    deleteCustomer(customer_to_remove)
   end
   
   #get all customers
@@ -108,30 +108,54 @@ class ShopwareApi
     customer_total = customer.fetch("total")
     customer_data_key = given_key
     customer_data_value = given_value
-    
-    searchForValue(customer_data, customer_data_key, customer_data_value, customer_total)
+    #check for existence of value
+    occur_frequency = intCheckForValue(customer_data, customer_data_key, customer_data_value, customer_total)
+    if(occur_frequency > 0)
+      if(occur_frequency == 1)
+        customer_to_delete = intSearchForValue(customer_data, customer_data_key, customer_data_value, customer_total)
+        return customer_to_delete
+      else
+        p "!!!"
+        p "several(#{occur_frequency}) users with #{customer_data_key}:#{customer_data_value} exist"
+        p "can not delete more than one ID"
+      end
+    else
+      p ("no user with this value exists")
+    end
   end
 
-  def searchForValue(data, key, value, last_element)  
+  def intCheckForValue(data, key, value, last_element)  
+    #how often value exists
+    counter_loop = 0
+    value_counter_occurrence = 0
+    #loop over all elements
+    while counter_loop < last_element do
+      #save each customer into overwritten variable received_data
+      received_data = data[counter_loop][key]
+      #check var for value and then print the id of the received_data
+      if received_data == (value)
+        value_counter_occurrence += 1
+      end
+      counter_loop += 1
+    end
+    return value_counter_occurrence
+  end
+
+  def intSearchForValue(data, key, value, last_element)  
     counter = 0
     #loop over all elements
     while counter < last_element do
       #save each customer into overwritten variable received_data
       received_data = data[counter][key]
       #check var for value and then print the id of the received_data
-      if received_data==(value)
-        #p data[counter]["id"]
+      if received_data == (value)
         customer_id_determined = data[counter]["id"]
         p "customer_id:#{customer_id_determined}"
-        if customer_id_determined
-          return customer_id_determined
-        else
-          return "No user with #{key}:#{value} exists!"
-        end
+        return customer_id_determined
       end
       counter += 1
     end
-  end
-
+  end  
+  
 end
 

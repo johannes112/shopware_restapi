@@ -15,9 +15,10 @@ shopware_user1 = ShopwareApi.new()#husername, hapikey)
 shopware_user1.setBasic(husername, hapikey, urlname)
 #shopware_user1.connectHtaccess()
 shopware_user1.setDigest(username, apikey, urlname)
-#puts shopware_user1.deleteCustomer(79)
-#shopware_user1.getCustomer(1)
+#puts shopware_user1.deleteCustomer(63)
+shopware_user1.getCustomer(83)
 #shopware_user1.getCustomers()
-shopware_user1.deleteCustomerByKey("email", "usdgpfuisod@usdgpfuisod.usdgpfuisod")
+#shopware_user1.deleteCustomerByKey("email", "robert.hoermann@emmos.de")
+#shopware_user1.deleteCustomerByKey("email", "johannes.launer@emmos.de")
 
 
