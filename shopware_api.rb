@@ -26,69 +26,89 @@ class ShopwareApi
   end
 
   #customers
-  def getCustomers() #get all customers
+  def getWholeData(data_of) #get all customers
     options = { :digest_auth => @auth_digest }
-    response_data = self.class.get("/api/customers", options)
+    url_data = getUrl(data_of)
+    url_request = url_data
+    p "URL: #{url_request}"
+    response_data = self.class.get(url_request, options)
     if response_data.success?
       response_data
     else
-      raise response_data.response_data
+      raise response.response_data
     end
-    
-    customers = response_data
-    getCustomersAll(customers)
+    getDataAll(response_data, data_of)
   end
 
   
-  def getCustomer(id) #get one customer with id
+  def getData(data_of, id) #get one customer with id
     options = { :digest_auth => @auth_digest }
-    response_data = self.class.get("/api/customers/#{id}", options)
+    url_data = getUrl(data_of)
+    url_request = "#{url_data}/#{id}"
+    p "URL: #{url_request}"
+    response_data = self.class.get(url_request, options)
     if response_data.success?
       response_data
     else
-      p "No user with this id exist"
+      p "Can not connect"
     end
-    
-    customer = response_data
-    p customer
+    p response_data
   end
   
-  def deleteCustomer(id) #delete customer by id
+  def deleteData(data_of, id) #delete customer by id
     options = { :digest_auth => @auth_digest }
-    self.class.delete("/api/customers/#{id}", options)
-  end
-  
-  def deleteCustomerByKey(key, value) #delete customer with key by value
-    options = { :digest_auth => @auth_digest }
-    response_data = self.class.get("/api/customers", options)
+    url_data = getUrl(data_of)
+    url_request = "#{url_data}/#{id}"
+    p "Delete URL: #{url_request}"
+    response_data = self.class.delete(url_request, options)
     if response_data.success?
       response_data
     else
-      raise response_data.response_data
+      p "Can not connect"
     end
-    
-    customers = response_data
-    customer_to_remove = getCustomerByKey(customers, key, value)
-    deleteCustomer(customer_to_remove)
   end
   
-  #get all customers
-  def getCustomersAll(given_response_httpParty)
+  def deleteDataByKey(data_of, key, value) #delete customer with key by value
+    options = { :digest_auth => @auth_digest }
+    url_data = getUrl(data_of)
+    url_request = "#{url_data}/"
+    p "URL: #{url_request}"
+    response_data = self.class.get(url_request, options)
+    if response_data.success?
+      response_data
+    else
+      p "Can not connect"
+    end
+    
+    data = response_data
+    data_to_remove = getDataByKey(data, key, value)
+    #deleteData("Customers", data_to_remove)
+    p data_to_remove
+  end
+  
+  #get all Data
+  def getDataAll(given_response_httpParty, data_of)
     #get whole data of api
     response_whole = given_response_httpParty.parsed_response
-    customer = response_whole
+    #customer = response_whole
     #get all keys
-    keys_whole = customer.keys
+    #keys_whole = customer.keys
     #save part of keys and unique entities
-    customer_data = customer.fetch("data")
-    customer_data_keys = customer_data[0].keys
-    customer_total = customer.fetch("total")
-    customer_last_entity = customer_total-1
-    customer_data_key = "email"
-    printAll(customer_data, customer_data_key, customer_total)
+    data = response_whole.fetch("data")
+    data_keys = data[0].keys
+    total = response_whole.fetch("total")
+    last_entity = total-1
+    # set attribute
+    case (data_of) 
+    when 'Customers'
+      data_key = "email"
+    when 'Orders'
+      data_key = "customerId"
+    end
+    printAllElements(data, data_key, total)
   end
 
-  def printAll(data, key, last_element)  
+  def printAllElements(data, key, last_element)  
   counter = 0
     while counter < last_element do
       p "ID:#{data[counter]["id"]}"
@@ -99,28 +119,35 @@ class ShopwareApi
   
 
   #get customer of id
-  def getCustomerByKey(given_response_httpParty, given_key, given_value)
+  def getDataByKey(given_response_httpParty, given_key, given_value)
     #get whole data of api
     whole_response = given_response_httpParty
-    customer = whole_response
+    whole_response = whole_response
     #save part of keys and unique entities
-    customer_data = customer.fetch("data")
-    customer_total = customer.fetch("total")
-    customer_data_key = given_key
-    customer_data_value = given_value
+    data = whole_response.fetch("data")
+    total = whole_response.fetch("total")
+    data_key = given_key
+    data_value = given_value
     #check for existence of value
-    occur_frequency = intCheckForValue(customer_data, customer_data_key, customer_data_value, customer_total)
+    occur_frequency = intCheckForValue(data, data_key, data_value, total)
+    p "data:#{data}"
+    p "data_key:#{data_key}"
+    p "data_value:#{data_value}"
+    p "data_total:#{total}"
+    p "frequ:#{occur_frequency}"
     if(occur_frequency > 0)
       if(occur_frequency == 1)
-        customer_to_delete = intSearchForValue(customer_data, customer_data_key, customer_data_value, customer_total)
-        return customer_to_delete
+        data_to_delete = intSearchForValue(data, data_key, data_value, total)
+        return data_to_delete
       else
         p "!!!"
-        p "several(#{occur_frequency}) users with #{customer_data_key}:#{customer_data_value} exist"
+        p "several(#{occur_frequency}) with #{data_key}:#{data_value} exist"
         p "can not delete more than one ID"
       end
     else
-      p ("no user with this value exists")
+      p ("no #{data_key} with this value (#{data_value}) exists")
+      p 
+      #p data
     end
   end
 
@@ -157,5 +184,50 @@ class ShopwareApi
     end
   end  
   
+  
+  #orders
+  def getOrders() #get all customers
+    options = { :digest_auth => @auth_digest }
+    response_data = self.class.get("/api/orders", options)
+    if response_data.success?
+      response_data
+    else
+      raise response_data.response_data
+    end
+    
+    orders = response_data
+    #keys_whole = orders.keys
+    #p keys_whole
+    #p orders
+    getCustomersAll(orders)
+  end
+  
+  def updateData(data_of, key, value) #delete customer with key by value
+    options = { :digest_auth => @auth_digest }
+    url_data = getUrl(data_of)
+    url_request = url_data
+    p "URL: #{url_request}"
+    response_data = self.class.get(url_request, options)
+    if response_data.success?
+      response_data
+    else
+      p "Can not connect"
+    end
+    
+    data = response_data.parsed_response
+    data_to_remove = getDataByKey(data, key, value)
+    p data_to_remove
+  end
+
+  def getUrl(data_of)
+    #decide which url have to be set
+    case (data_of)
+      when 'Customers'
+        url = "/api/customers"
+      when 'Orders'
+        url = "/api/orders"
+    end
+  end
+    
 end
 
