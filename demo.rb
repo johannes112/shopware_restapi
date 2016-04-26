@@ -21,5 +21,5 @@ shopware_user1.setDigest(username, apikey, urlname)
 #shopware_user1.deleteDataByKey("Customers", "email", "schoko@ghetto.de")
 #shopware_user1.getData('Orders', 399)
 #shopware_user1.getWholeData('Orders')
-shopware_user1.updateData("Customers", "email", "test.test@test.de")
-
+shopware_user1.updateData("email", "test.test@test.de")
+#shopware_user1.getWholeData('Orders')

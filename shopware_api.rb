@@ -27,23 +27,14 @@ class ShopwareApi
 
   #customers
   def getWholeData(data_of) #get all customers
-    options = { :digest_auth => @auth_digest }
-    url_data = getUrl(data_of)
-    url_request = url_data
-    p "URL: #{url_request}"
-    response_data = self.class.get(url_request, options)
-    if response_data.success?
-      response_data
-    else
-      raise response.response_data
-    end
-    getDataAll(response_data, data_of)
+    p connectAndGetData(data_of)
+    #getDataAll(response_data, data_of)
   end
 
   
   def getData(data_of, id) #get one customer with id
     options = { :digest_auth => @auth_digest }
-    url_data = getUrl(data_of)
+    url_data = stringGetUrlPath(data_of)
     url_request = "#{url_data}/#{id}"
     p "URL: #{url_request}"
     response_data = self.class.get(url_request, options)
@@ -52,12 +43,13 @@ class ShopwareApi
     else
       p "Can not connect"
     end
-    p response_data
+    response_data_json = response_data.parsed_response
+    p response_data_json
   end
   
   def deleteData(data_of, id) #delete customer by id
     options = { :digest_auth => @auth_digest }
-    url_data = getUrl(data_of)
+    url_data=  stringGetUrlPath(data_of)
     url_request = "#{url_data}/#{id}"
     p "Delete URL: #{url_request}"
     response_data = self.class.delete(url_request, options)
@@ -70,7 +62,7 @@ class ShopwareApi
   
   def deleteDataByKey(data_of, key, value) #delete customer with key by value
     options = { :digest_auth => @auth_digest }
-    url_data = getUrl(data_of)
+    url_data = stringGetUrlPath(data_of)
     url_request = "#{url_data}/"
     p "URL: #{url_request}"
     response_data = self.class.get(url_request, options)
@@ -130,11 +122,6 @@ class ShopwareApi
     data_value = given_value
     #check for existence of value
     occur_frequency = intCheckForValue(data, data_key, data_value, total)
-    p "data:#{data}"
-    p "data_key:#{data_key}"
-    p "data_value:#{data_value}"
-    p "data_total:#{total}"
-    p "frequ:#{occur_frequency}"
     if(occur_frequency > 0)
       if(occur_frequency == 1)
         data_to_delete = intSearchForValue(data, data_key, data_value, total)
@@ -177,34 +164,41 @@ class ShopwareApi
       #check var for value and then print the id of the received_data
       if received_data == (value)
         customer_id_determined = data[counter]["id"]
-        p "customer_id:#{customer_id_determined}"
+        #p "customer_id:#{customer_id_determined}"
         return customer_id_determined
       end
       counter += 1
     end
   end  
   
-  
-  #orders
-  def getOrders() #get all customers
-    options = { :digest_auth => @auth_digest }
-    response_data = self.class.get("/api/orders", options)
-    if response_data.success?
-      response_data
-    else
-      raise response_data.response_data
-    end
-    
-    orders = response_data
-    #keys_whole = orders.keys
-    #p keys_whole
-    #p orders
-    getCustomersAll(orders)
+  def updateData(key, value) #get order_id of order with customer_id with key and value 
+    # looking for id of user which belongs to mailaddress
+    data_customers = connectAndGetData('Customers')
+    #data_customers = data_gotten.parsed_response
+    #p "search key (#{key}) value (#{value})"
+    customer_id = getDataByKey(data_customers, key, value)
+    p "UPDATE:cust_id:#{customer_id}"
+    # looking for id of user which found by mailaddress
+    data_orders = connectAndGetData('Orders')
+    #data_orders = data_gotten.parsed_response
+    #p "search key (#{key}) value (#{customer_id})"
+    order_id = getDataByKey(data_orders, "customerId", customer_id)
+    #p "UPDATE:order_id:#{order_id}"
+    determined_order_id = getDataByKey(data_orders, "id", order_id)
+    p determined_order_id
+    #determined_order_json = determined_order.parsed_response
+    #p "search key (#{key}) value (#{customer_id})"
+    p
+    p "Determined_order:order_id:#{determined_order_id}"
+    determined_order = getData('Orders', determined_order_id)
+    p determined_order
+    #to avoid an export of this data i have to set "orderStatusId" of the order to 4
   end
   
-  def updateData(data_of, key, value) #delete customer with key by value
+  def connectAndGetData(url_of)
+    # connect to url of given param and return its value
     options = { :digest_auth => @auth_digest }
-    url_data = getUrl(data_of)
+    url_data = stringGetUrlPath(url_of)
     url_request = url_data
     p "URL: #{url_request}"
     response_data = self.class.get(url_request, options)
@@ -213,13 +207,11 @@ class ShopwareApi
     else
       p "Can not connect"
     end
-    
-    data = response_data.parsed_response
-    data_to_remove = getDataByKey(data, key, value)
-    p data_to_remove
+    response_data_json = response_data.parsed_response
+    return response_data_json
   end
 
-  def getUrl(data_of)
+  def stringGetUrlPath(data_of)
     #decide which url have to be set
     case (data_of)
       when 'Customers'
@@ -228,6 +220,6 @@ class ShopwareApi
         url = "/api/orders"
     end
   end
-    
+  
 end
 
