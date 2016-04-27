@@ -171,28 +171,52 @@ class ShopwareApi
     end
   end  
   
-  def updateData(key, value) #get order_id of order with customer_id with key and value 
+  def intSearchForKey(data, key)  
+      p "key:#{key}"
+      received_data = data['orderStatusId']
+      p "received_data:#{received_data}"
+    return received_data
+  end  
+  
+  def getOrderByKey(given_response_httpParty, given_key)
+    #get whole data of api
+    one_order = given_response_httpParty
+    data = one_order.fetch("data")
+    data_key = given_key
+    data_value = intSearchForKey(data, data_key)
+    return data_value
+  end
+  
+  def updateData(key, value) 
+    #get order_id of order with customer_id with key and value 
+    #1. get customer_id of customer with mailaddress
+    #2. get order_id of order with customer_id
+    #3. get orderStatusId of order
+    #4. get order
     # looking for id of user which belongs to mailaddress
     data_customers = connectAndGetData('Customers')
-    #data_customers = data_gotten.parsed_response
-    #p "search key (#{key}) value (#{value})"
-    customer_id = getDataByKey(data_customers, key, value)
-    p "UPDATE:cust_id:#{customer_id}"
-    # looking for id of user which found by mailaddress
     data_orders = connectAndGetData('Orders')
-    #data_orders = data_gotten.parsed_response
-    #p "search key (#{key}) value (#{customer_id})"
+    #1.
+    customer_id = getDataByKey(data_customers, key, value)
+    p "UPDATE:customer_id:#{customer_id}"
+    #2.
     order_id = getDataByKey(data_orders, "customerId", customer_id)
-    #p "UPDATE:order_id:#{order_id}"
-    determined_order_id = getDataByKey(data_orders, "id", order_id)
-    p determined_order_id
+    p "UPDATE:order_id:#{order_id}"
+    #3.
+    order_orderStatus = getData("Orders", order_id)
+    #p "order_orderStatus: #{order_orderStatus}"
+    order_orderStatus_Id = getOrderByKey(order_orderStatus, "orderStatusId")
+    #order_orderStatus_Id = getDataByKey(order_orderStatus, "orderStatusId", order_id)
+    p order_orderStatus_Id
     #determined_order_json = determined_order.parsed_response
     #p "search key (#{key}) value (#{customer_id})"
     p
-    p "Determined_order:order_id:#{determined_order_id}"
-    determined_order = getData('Orders', determined_order_id)
-    p determined_order
+    p "Determined_order:order_id:#{order_orderStatus_Id}"
+    #determined_order = getData('Orders', determined_order_id)
+    #determined_order_orderStatus = getData(determined_order, "orderStatus")
+    #p determined_order_orderStatus
     #to avoid an export of this data i have to set "orderStatusId" of the order to 4
+    
   end
   
   def connectAndGetData(url_of)
