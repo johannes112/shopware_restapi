@@ -172,14 +172,12 @@ class ShopwareApi
   end  
   
   def intSearchForKey(data, key)  
-      p "key:#{key}"
-      received_data = data['orderStatusId']
-      p "received_data:#{received_data}"
+      received_data = data[key]
     return received_data
   end  
   
   def getOrderByKey(given_response_httpParty, given_key)
-    #get whole data of api
+    #one entity of ordertable
     one_order = given_response_httpParty
     data = one_order.fetch("data")
     data_key = given_key
@@ -206,15 +204,7 @@ class ShopwareApi
     order_orderStatus = getData("Orders", order_id)
     #p "order_orderStatus: #{order_orderStatus}"
     order_orderStatus_Id = getOrderByKey(order_orderStatus, "orderStatusId")
-    #order_orderStatus_Id = getDataByKey(order_orderStatus, "orderStatusId", order_id)
     p order_orderStatus_Id
-    #determined_order_json = determined_order.parsed_response
-    #p "search key (#{key}) value (#{customer_id})"
-    p
-    p "Determined_order:order_id:#{order_orderStatus_Id}"
-    #determined_order = getData('Orders', determined_order_id)
-    #determined_order_orderStatus = getData(determined_order, "orderStatus")
-    #p determined_order_orderStatus
     #to avoid an export of this data i have to set "orderStatusId" of the order to 4
     
   end
