@@ -6,29 +6,52 @@ class ShopwareApi
   include HTTParty
   #for int use htaccess-data too
   default_timeout 2
-  
-  def setDigest(username, password, url_base)
-    class_httparty = self.class
-    class_httparty.base_uri url_base
-    class_httparty.default_options.delete(:basic_auth)
-    @auth_digest = {:username => username, :password => password}
-    class_httparty.digest_auth username, password
-    #puts "auth_digest:#{@auth_digest}"
-  end
-  
+  #use for connection with htaccess but it does not work as expected
   def setBasic(username, password, url_base)
     class_httparty = self.class
+    #set url
     class_httparty.base_uri url_base
     class_httparty.default_options.delete(:digest_auth)
     @auth_basic = {:username => username, :password => password}
     class_httparty.digest_auth username, password
     #puts "auth_basic:#{@auth_basic}"
   end
+  def getBasic()
+    return @auth_basic
+  end
+
+  #use for connection with shopware api
+  def setDigest(username, password, url_base)
+    class_httparty = self.class
+    #set url
+    class_httparty.base_uri url_base
+    class_httparty.default_options.delete(:basic_auth)
+    @auth_digest = {:username => username, :password => password}
+    class_httparty.digest_auth username, password
+    #puts "auth_digest:#{@auth_digest}"
+  end
+  def getDigest()
+    return @auth_digest
+  end
+  
+  def authenticateWith(url_of) #get one customer with id
+    url = self.class.base_uri
+    p "urlname:#{url}"
+    url_data = stringGetUrlPath(url_of)
+    url_request = url_data
+    p "URL: #{url_request}"
+    response_data = self.class.get(url_request, options)
+    p "RESPONSE: #{response_data.code.to_i}"
+    if response_data.success?
+      response_data
+    else
+      p "Can not connect"
+    end
+  end
 
   #customers
   def getWholeData(data_of) #get all customers
     p connectAndGetData(data_of)
-    #getDataAll(response_data, data_of)
   end
 
   
@@ -185,28 +208,54 @@ class ShopwareApi
     return data_value
   end
   
-  def updateData(key, value) 
+  def setOrderByKey(given_response_httpParty, given_key)
+    #one entity of ordertable
+    one_order = given_response_httpParty
+    data = one_order.fetch("data")
+    data_key = given_key
+    data_value = intSearchForKey(data, data_key)
+    return data_value
+  end
+  
+  def setValue(data_of, id, key, value) #update entity of id and set key to value
+    options = { 
+      :digest_auth => @auth_digest ,
+      :body => { :orderStatusId => 4}
+    }
+    url_data = stringGetUrlPath(data_of)
+    #url_request = "#{url_data}/#{id}/#{key}/#{value}":query => { :email => "alan+thinkvitamin@carsonified.com" })
+    url_request = "#{url_data}/#{id}"
+    p "PUT: #{url_request}"
+    response_data = self.class.put(url_request, options)
+    "Responsecode:#{response_data.code.to_i}"
+    if response_data.success?
+      p "SUCCESS"
+    else
+       p "FAIL"
+    end
+  end
+  
+  def updateData(key, value) #update statusOrderId to 4 of order with order_id 
     #get order_id of order with customer_id with key and value 
     #1. get customer_id of customer with mailaddress
     #2. get order_id of order with customer_id
     #3. get orderStatusId of order
-    #4. get order
+    #4. set orderStatusId of order
     # looking for id of user which belongs to mailaddress
     data_customers = connectAndGetData('Customers')
     data_orders = connectAndGetData('Orders')
-    #1.
+    #1. get customer_id by key
     customer_id = getDataByKey(data_customers, key, value)
     p "UPDATE:customer_id:#{customer_id}"
-    #2.
+    #2. get order_id by key
     order_id = getDataByKey(data_orders, "customerId", customer_id)
-    p "UPDATE:order_id:#{order_id}"
-    #3.
+    #3. get orderStatusId
     order_orderStatus = getData("Orders", order_id)
-    #p "order_orderStatus: #{order_orderStatus}"
     order_orderStatus_Id = getOrderByKey(order_orderStatus, "orderStatusId")
-    p order_orderStatus_Id
+    #set orderStatus_Id to 4 (Stoniert / Abgelehnt)
+    p "key:#{key}, value:#{value}"
+    setValue("Orders", 399, "orderStatusId", 4)
     #to avoid an export of this data i have to set "orderStatusId" of the order to 4
-    
   end
   
   def connectAndGetData(url_of)

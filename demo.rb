@@ -8,18 +8,20 @@ husername = ARGV[2]
 puts "husername:#{husername}"
 hapikey = ARGV[3]
 puts "hapikey:#{hapikey}"
-urlname = ARGV[4]
+@urlname = ARGV[4]
+urlname = @urlname
 puts "urlname:#{urlname}"
 
 shopware_user1 = ShopwareApi.new()#husername, hapikey)
-shopware_user1.setBasic(husername, hapikey, urlname)
 #shopware_user1.connectHtaccess()
+shopware_user1.setBasic(husername, hapikey, urlname)
 shopware_user1.setDigest(username, apikey, urlname)
 #shopware_user1.deleteData("Customers", 63)
 #shopware_user1.getCustomer(83)
 #shopware_user1.getWholeData('Customers')
 #shopware_user1.deleteDataByKey("Customers", "email", "schoko@ghetto.de")
-#shopware_user1.getData('Orders', 399)
 #shopware_user1.getWholeData('Orders')
+#shopware_user1.getData('Orders', 399)
 shopware_user1.updateData("email", "test.test@test.de")
 #shopware_user1.getWholeData('Orders')
+#shopware_user1.authenticateWith('Customers')
