@@ -1,4 +1,5 @@
-#Use ruby to control the restapi of ShopwareThis is a simple sample which shows how to use ruby to execute api of shopware.
+#Use ruby to control the restapi of Shopware
+This is a simple sample which shows how to use ruby to execute api of shopware.
 
 To execute this demo:
 _ruby demo.rb <user_api> <pw_api> <user> <pw> <url>_
