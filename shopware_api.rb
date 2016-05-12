@@ -25,11 +25,11 @@ class ShopwareApi
   end
   def updateData(url, options)
     response_data = self.class.put(url, options)
-    "Responsecode:#{response_data.code.to_i}"
+    p "Responsecode:#{response_data.code.to_i}"
     if response_data.success?
-      p "SUCCESS"
+      p "SUCCESS: update completed"
     else
-       p "FAIL"
+       p "ERROR: update failed"
     end
   end
   def deleteData(url)

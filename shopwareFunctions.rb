@@ -22,7 +22,7 @@ module ShopwareFunctions
     return response_data
   end
 
-  def deleteCustomer(data_of, id) #delete customer by id
+  def deleteDataId(data_of, id) #delete customer by id
     url_data=  stringGetUrlPath(data_of)
     url_request = "#{url_data}/#{id}"
     p "Delete URL: #{url_request}"
@@ -161,10 +161,10 @@ module ShopwareFunctions
     #url_request = "#{url_data}/#{id}/#{key}/#{value}":query => { :email => "alan+thinkvitamin@carsonified.com" })
     url_request = "#{url_data}/#{id}"
     p "PUT: #{url_request}"
-    updateData(utl_request, options)
+    updateData(url_request, options)
   end
   
-  def updateData(key, value) #update statusOrderId to 4 of order with order_id 
+  def updateDataBy(key, value) #update statusOrderId to 4 of order with order_id 
     #get order_id of order with customer_id with key and value 
     #1. get customer_id of customer with mailaddress
     #2. get order_id of order with customer_id
@@ -190,10 +190,11 @@ module ShopwareFunctions
 
   def stringGetUrlPath(data_of)
     #decide which url have to be set
+    data_of = data_of.downcase
     case (data_of)
-      when 'Customers'
+      when 'customers'
         url = "/api/customers"
-      when 'Orders'
+      when 'orders'
         url = "/api/orders"
     end
   end
